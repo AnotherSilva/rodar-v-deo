@@ -1,0 +1,53 @@
+import os
+from ffpyplayer.player import MediaPlayer
+import cv2
+
+def PlayVideo(video_path):
+    def get_frame(player):
+        """
+        Função auxiliar para obter o quadro de vídeo e o áudio ao mesmo tempo.
+        """
+        audio_frame, val = player.get_frame()
+        if val != 'eof' and audio_frame is not None:
+            img, t = audio_frame
+        return val
+
+    video = cv2.VideoCapture(video_path)
+    player = MediaPlayer(video_path)
+
+    while True:
+        grabbed, frame = video.read()
+        if not grabbed:
+            print("Fim do vídeo")
+            break
+
+        val = get_frame(player)
+        
+        cv2.imshow("Video", frame)
+
+        if cv2.waitKey(28) & 0xFF == ord("q"):
+            break
+
+    video.release()
+    cv2.destroyAllWindows()
+
+def find_and_play_video(folder_path, keyword):
+    if not os.path.exists(folder_path):
+        print(f"Erro: O caminho da pasta '{folder_path}' não foi encontrado.")
+        return
+    
+    files = os.listdir(folder_path)
+    video_files = [f for f in files if keyword.lower() in f.lower() and f.endswith(('.mp4', '.avi', '.mov', '.mkv'))]
+    
+    if video_files:
+        video_path = os.path.join(folder_path, video_files[0])
+        print(f"Tocando vídeo: {video_path}")
+        PlayVideo(video_path)
+    else:
+        print(f"Nenhum vídeo encontrado com a palavra '{keyword}'.")
+
+# Use um caminho absoluto para evitar problemas
+folder_path = r'C:\Users\bisco\Projetos\Teste chamar video\videos'  # Substitua pelo caminho absoluto real
+keyword = input("Digite a palavra-chave para o vídeo: ")
+
+find_and_play_video(folder_path, keyword)
